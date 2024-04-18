@@ -31,13 +31,17 @@ class MoviePicker {
         event.preventDefault();
         const query = $("#searchInput").val();
         const url = `https://api.themoviedb.org/3/search/movie?api_key=${this.apiKey}&query=${encodeURIComponent(query)}`;
-
+    
         $.ajax({
             url: url,
             method: "GET",
             success: (response) => {
                 if (response.results.length > 0) {
                     this.processSearchResults(response.results);
+                    $('.tab-button').removeClass('active');
+                    $('.tab-button[data-user="swipe"]').addClass('active');
+                    $('.tab-content').removeClass('active');
+                    $('#swipeContent').addClass('active');
                 } else {
                     $("#movieSwipeContainer").html("<p>No movies found. Try another search!</p>");
                 }
@@ -54,8 +58,8 @@ class MoviePicker {
             year: movie.release_date ? movie.release_date.substring(0, 4) : 'N/A',
             poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'default_poster.png',
             id: movie.id,
-            genres: movie.genre_ids.map(id => this.getGenreName(id)), // Ensure this is an array
-            rating: this.getRating(movie.adult, movie.release_date)
+            genres: movie.genre_ids.map(id => this.getGenreName(id)),
+            releaseDates: movie.release_dates
         }));
         this.currentIndex = 0;
         this.displayCurrentMovie();
@@ -65,96 +69,125 @@ class MoviePicker {
         if (this.movies.length > 0 && this.currentIndex < this.movies.length) {
             const movie = this.movies[this.currentIndex];
     
-            $('#movieSwipeContainer').html(`
-                <div class="movie-card">
-                    <img src="${movie.poster}" alt="Poster" onerror="this.onerror=null;this.src='default_poster.png';">
-                    <div class="movie-info">
-                        <h3>${movie.title} (${movie.year})</h3>
-                        <div class="movie-synopsis"></div>
-                        <div class="movie-details"></div>
-                        <div class="movie-actions">
-                            <button id="likeButtonVladimir" class="vladimir-button">Like for Vladimir</button>
-                            <button id="likeButtonTaylor" class="taylor-button">Like for Taylor</button>
-                            <button id="passButton">Pass</button>
-                        </div>
-                    </div>
-                </div>
-            `);
+            this.fetchMovieDetails(movie.id)
+                .then(response => {
+                    const certification = response.certification || 'Not Rated';
+                    movie.certification = certification;
     
-            $('#likeButtonVladimir').click(() => vladimirMoviePicker.likeMovie(movie));
-            $('#likeButtonTaylor').click(() => taylorMoviePicker.likeMovie(movie));
-            $('#passButton').click(this.passMovie.bind(this));
-            this.fetchMovieDetails(movie.id);
+                    $('#movieSwipeContainer').html(`
+                        <div class="movie-card">
+                            <img src="${movie.poster}" alt="Poster" onerror="this.onerror=null;this.src='default_poster.png';">
+                            <div class="movie-info">
+                                <h3>${movie.title} (${movie.year})</h3>
+                                <div class="movie-synopsis"></div>
+                                <div class="movie-details"></div>
+                                <div class="movie-actions">
+                                    <button id="likeButtonVladimir" class="vladimir-button">Like for Vladimir</button>
+                                    <button id="likeButtonTaylor" class="taylor-button">Like for Taylor</button>
+                                    <button id="passButton">Pass</button>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+    
+                    $('#likeButtonVladimir').click(() => vladimirMoviePicker.likeMovie(movie));
+                    $('#likeButtonTaylor').click(() => taylorMoviePicker.likeMovie(movie));
+                    $('#passButton').click(this.passMovie.bind(this));
+    
+                    const synopsisContainer = $(".movie-synopsis");
+                    synopsisContainer.html(`<p>${response.synopsis}</p>`);
+    
+                    const detailsContainer = $(".movie-details");
+                    detailsContainer.html(`
+                        <p style="text-align: center;"><strong>Genres:</strong> ${response.genres}</p>
+                        <p style="text-align: center;"><strong>Age Rating:</strong> ${certification}</p>
+                        <p style="text-align: center;"><strong>Duration:</strong> ${response.runtime} minutes</p>
+                        ${response.trailerLink ? `<p style="text-align: center;"><a href="${response.trailerLink}" target="_blank">Watch Trailer</a></p>` : ''}
+                        <p style="text-align: center; font-size: 14px;"><strong>Keywords:</strong></p>
+                        <div class="keyword-container">${response.keywords}</div>
+                    `);
+                });
+    
+            const movieCard = $('.movie-card');
+            let touchStartX = 0;
+            let touchEndX = 0;
+    
+            movieCard.on('touchstart', function(event) {
+                touchStartX = event.touches[0].clientX;
+            });
+    
+            movieCard.on('touchend', function(event) {
+                touchEndX = event.changedTouches[0].clientX;
+                if (touchEndX < touchStartX - 100) {
+                    vladimirMoviePicker.passMovie();
+                } else if (touchEndX > touchStartX + 100) {
+                    vladimirMoviePicker.likeMovie(movie);
+                }
+            });
         } else {
             $('#movieSwipeContainer').html("<p>No movies found. Try another search!</p>");
         }
-
-        const movieCard = $('.movie-card');
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        movieCard.on('touchstart', function(event) {
-            touchStartX = event.touches[0].clientX;
-        });
-
-        movieCard.on('touchend', function(event) {
-            touchEndX = event.changedTouches[0].clientX;
-            if (touchEndX < touchStartX - 100) {
-                vladimirMoviePicker.passMovie();
-            } else if (touchEndX > touchStartX + 100) {
-                vladimirMoviePicker.likeMovie(movie);
-            }
-        });
     }
 
     fetchMovieDetails(movieId) {
-        const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${this.apiKey}&append_to_response=videos,keywords`;
+        const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${this.apiKey}&append_to_response=videos,keywords,release_dates`;
         
         return $.ajax({
             url: url,
             method: "GET"
         }).then(response => {
-            const synopsis = response.overview;
-            const genres = response.genres.map(genre => genre.name).join(', ');
-            const rating = response.adult ? 'R' : 'PG-13';
-            const runtime = response.runtime;
-            const trailerLink = response.videos.results.length > 0 ? `https://www.youtube.com/watch?v=${response.videos.results[0].key}` : '';
-            const keywords = response.keywords.keywords.map(keyword => `<span class="keyword">${keyword.name}</span>`).join('');
+            const synopsis = response.overview || 'No synopsis available.';
+            const genres = response.genres.map(genre => genre.name).join(', ') || 'No genres listed.';
+            const runtime = response.runtime || 'Runtime not available.';
+            const trailerKey = response.videos.results.length > 0 ? response.videos.results[0].key : '';
+            const trailerLink = trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : 'No trailer available.';
+            const keywords = response.keywords.keywords.map(keyword => `<span class="keyword">${keyword.name}</span>`).join('') || 'No keywords found.';
+    
+            let certification = 'NR'; // Default certification
+            const usReleaseDates = response.release_dates.results.find(result => result.iso_3166_1 === 'US');
+            if (usReleaseDates) {
+                const rating = usReleaseDates.release_dates.find(release => release.certification !== '');
+                if (rating) {
+                    certification = rating.certification;
+                }
+            }
             
-            const synopsisContainer = $(".movie-synopsis");
-            synopsisContainer.html(`<p>${synopsis}</p>`);
-            
-            const detailsContainer = $(".movie-details");
-            detailsContainer.html(`
-                <p style="text-align: center;"><strong>Genres:</strong> ${genres}</p>
-                <p style="text-align: center;"><strong>Age Rating:</strong> ${rating}</p>
-                <p style="text-align: center;"><strong>Duration:</strong> ${runtime} minutes</p>
-                ${trailerLink ? `<p style="text-align: center;"><a href="${trailerLink}" target="_blank">Watch Trailer</a></p>` : ''}
-                <p style="text-align: center; font-size: 14px;"><strong>Keywords:</strong></p>
-                <div class="keyword-container">${keywords}</div>
-            `);
+            return {
+                synopsis: synopsis,
+                genres: genres,
+                runtime: runtime,
+                trailerLink: trailerLink,
+                keywords: keywords,
+                certification: certification
+            };
         });
-    }
+    } 
 
     likeMovie(movie) {
         if (!this.likedMovies.some(m => this.compareMovies(m, movie))) {
             this.fetchMovieDetails(movie.id)
                 .then(() => {
                     this.likedMovies.push(movie);
-                    // Pass this.likedMovies to displayLikedMovies
                     this.displayLikedMovies(this.likedMovies); 
+                    this.currentIndex++;
+                    if (this.currentIndex < this.movies.length) {
+                        this.displayCurrentMovie();
+                    } else {
+                        $('#movieSwipeContainer').html("<p>End of search results, or start a new search.</p>");
+                    }
+                    this.findCommonLikedMovies();
+                    this.displayCommonLikedMovies();
+                    this.updatePreferences(movie);
+                    this.suggestMovies();
                 });
-        }
-        this.currentIndex++;
-        if (this.currentIndex < this.movies.length) {
-            this.displayCurrentMovie();
         } else {
-            $('#movieSwipeContainer').html("<p>End of search results, or start a new search.</p>");
+            this.currentIndex++;
+            if (this.currentIndex < this.movies.length) {
+                this.displayCurrentMovie();
+            } else {
+                $('#movieSwipeContainer').html("<p>End of search results, or start a new search.</p>");
+            }
         }
-        this.findCommonLikedMovies();
-        this.displayCommonLikedMovies();
-        this.updatePreferences(movie);
-        this.suggestMovies(); // Suggest movies after each like
     }
 
     removeMovie(movieId) {
@@ -360,17 +393,24 @@ class MoviePicker {
     
     filterByRating() {
         const rating = $('#rating-select').val();
-        const filteredMovies = rating === 'All' ? this.likedMovies : this.likedMovies.filter(movie => movie.rating === rating);
+        const filteredMovies = rating === 'All' ? this.likedMovies : this.likedMovies.filter(movie => movie.certification === rating);
         this.displayLikedMovies(filteredMovies);
     }
 
     getRating(isAdult, releaseDate) {
         if (isAdult) {
             return 'R';
-        } else if (releaseDate && new Date(releaseDate) > new Date('1986-07-01')) {
-            return 'PG-13';
         } else {
-            return 'PG';
+            const releaseDateObj = new Date(releaseDate);
+            if (releaseDateObj >= new Date('1984-07-01') && releaseDateObj < new Date('1990-01-01')) {
+                return 'PG-13';
+            } else if (releaseDateObj >= new Date('1990-01-01')) {
+                return 'PG-13';
+            } else if (releaseDateObj >= new Date('1968-11-01') && releaseDateObj < new Date('1984-07-01')) {
+                return 'PG';
+            } else {
+                return 'G';
+            }
         }
     }
 
