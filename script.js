@@ -31,7 +31,7 @@ class MoviePicker {
         event.preventDefault();
         const query = $("#searchInput").val();
         const url = `https://api.themoviedb.org/3/search/movie?api_key=${this.apiKey}&query=${encodeURIComponent(query)}`;
-    
+
         $.ajax({
             url: url,
             method: "GET",
@@ -42,12 +42,11 @@ class MoviePicker {
                     $("#movieSwipeContainer").html("<p>No movies found. Try another search!</p>");
                 }
             },
-            error: (jqXHR, textStatus) => {
-                alert("Failed to search movies due to: " + textStatus);
+            error: () => {
+                alert("An error occurred during the search. Please try again.");
             }
         });
     }
-    
 
     processSearchResults(results) {
         this.movies = results.map(movie => ({
@@ -176,12 +175,10 @@ class MoviePicker {
         const container = $(`#likedMoviesList-${this.user}`);
         if (movies.length > 0) {
             const html = movies.map(movie => `
-                <div class="movie-card">
-                    <img src="${movie.poster}" alt="${movie.title} Poster">
-                    <div class="movie-info">
-                        <h3>${movie.title} (${movie.year})</h3>
-                        <button class="removeButton" data-movie-id="${movie.id}">Remove</button>
-                    </div>
+                <div class="liked-movie">
+                    <img src="${movie.poster}" alt="Poster">
+                    <span>${movie.title} (${movie.year})</span>
+                    <button class="removeButton" data-movie-id="${movie.id}">Remove</button>
                 </div>
             `).join("");
             container.html(html);
@@ -473,74 +470,6 @@ class MoviePicker {
     compareMovies(movie1, movie2) {
         return movie1.title === movie2.title && movie1.year === movie2.year;
     }
-
-    startQuizGame() {
-        let questionIndex = 0;
-        const questions = this.generateQuizQuestions();
-        const displayNextQuestion = () => {
-            if (questionIndex < questions.length) {
-                $('#gameMode').html(`
-                    <div>
-                        <h4>Question: ${questions[questionIndex].question}</h4>
-                        ${questions[questionIndex].options.map((option, idx) => `
-                            <button onclick="handleAnswer(${idx})">${option}</button>
-                        `).join('')}
-                    </div>
-                `);
-            } else {
-                $('#gameMode').html('<h3>Quiz Completed!</h3>');
-                // Here you can add logic to decide the movie based on quiz results
-            }
-        };
-    
-        const handleAnswer = (answerIndex) => {
-            // Logic to handle the answer and decide the next step
-            questionIndex++;
-            displayNextQuestion();
-        };
-    
-        displayNextQuestion();
-    }
-
-    syncPreferences() {
-        // Assuming you have some API or server to handle preferences
-        const url = `https://yourserver.com/users/${this.user}/preferences`;
-        const data = {
-            genres: this.preferences.genres,
-            ratings: this.preferences.ratings,
-            keywords: this.preferences.keywords
-        };
-    
-        $.ajax({
-            url: url,
-            method: "POST",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: (response) => {
-                console.log('Preferences synced successfully!');
-            },
-            error: () => {
-                alert("Failed to sync preferences.");
-            }
-        });
-    }
-
-    initWebSocket() {
-    const ws = new WebSocket('wss://yourwebsocketserver.com/');
-    ws.onopen = () => {
-        console.log('WebSocket connection established');
-    };
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.action === 'newLike' && data.user !== this.user) {
-            this.likedMovies.push(data.movie);
-            this.displayLikedMovies(this.likedMovies);
-        }
-    };
-    ws.onerror = (error) => {
-        console.log('WebSocket error: ' + error.message);
-    };
-}
 }
 
 $(document).ready(function() {
