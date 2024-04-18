@@ -1,0 +1,419 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #1c1c1c;
+    color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #2c2c2c;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+#searchForm {
+    display: flex;
+}
+
+#searchForm input[type="text"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    width: 300px;
+}
+
+#searchForm button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    background-color: #e50914;
+    color: white;
+    cursor: pointer;
+}
+
+main {
+    padding: 20px;
+}
+
+.movie-card {
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.movie-card img {
+    border-radius: 5px;
+    width: 200px;
+}
+
+.movie-info {
+    text-align: center;
+}
+
+.movie-info h3 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.movie-synopsis {
+    margin-top: 10px;
+}
+
+.movie-details {
+    display: flex;
+    gap: 20px;
+}
+
+.movie-details-poster img {
+    width: 200px;
+    border-radius: 5px;
+}
+
+.movie-details-info {
+    flex: 1;
+}
+
+.movie-actions {
+    margin-top: 20px;
+}
+
+.movie-info p {
+    margin: 10px 0;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e50914;
+    color: white;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #f40612;
+}
+
+#likeButton {
+    background-color: #1DB954;
+}
+
+#likeButton:hover {
+    background-color: #1ed760;
+}
+
+footer {
+    background-color: #2c2c2c;
+    padding: 20px;
+    text-align: center;
+}
+
+#randomMovieButton {
+    background-color: #FFC107;
+    color: #1c1c1c;
+}
+
+#randomMovieButton:hover {
+    background-color: #FFD54F;
+}
+
+#raceContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#raceContainer.hidden {
+    display: none;
+}
+
+#raceTrack {
+    width: 80%;
+    height: 150px;
+    background-color: #f5f5f5;
+    border: 2px solid #e50914;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.marble {
+    width: 100px;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 2s ease-in-out;
+}
+
+.marble img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#winnerDisplay {
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#winnerDisplay.show {
+    opacity: 1;
+}
+
+#winnerDisplay h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+#winnerDisplay img {
+    width: 200px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#confettiContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+#confettiContainer.show {
+    opacity: 1;
+}
+
+#closeButton {
+    display: none;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #e50914;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#closeButton.show {
+    display: block;
+}
+
+.liked-movies-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#likedMoviesList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 20px;
+}
+
+.liked-movie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #2c2c2c;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.liked-movie:hover {
+    transform: translateY(-5px);
+}
+
+.liked-movie img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.liked-movies-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.liked-movies-column {
+    flex: 1;
+    position: relative;
+}
+
+.liked-movies-column h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.liked-movie span {
+    text-align: center;
+    font-size: 14px;
+}
+
+.liked-movie button {
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #e50914;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.liked-movie button:hover {
+    background-color: #f40612;
+}
+
+.liked-movies-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-gap: 20px;
+}
+
+#gameContainer {
+    margin-top: 20px;
+}
+
+#genreSelection,
+#ratingSelection {
+    margin-bottom: 10px;
+}
+
+.genreBtn,
+.ratingBtn {
+    margin-right: 10px;
+}
+
+#gameResults {
+    margin-top: 20px;
+}
+
+.vladimir-button {
+    background-color: #4CAF50;
+}
+
+.taylor-button {
+    background-color: #2196F3;
+}
+
+.vladimir-button:hover {
+    background-color: #45a049;
+}
+
+.taylor-button:hover {
+    background-color: #1e88e5;
+}
+
+.keyword-container {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.keyword {
+    display: inline-block;
+    background-color: #444;
+    color: #f5f5f5;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 12px;
+}
+
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.tab-button.active {
+    background-color: #e50914;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.game-mode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    background-color: #333;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+#gameResults {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+#gameResults button {
+    margin: 10px;
+}
+
+.filter-options {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.genre-filter,
+.rating-filter {
+    margin: 0 10px;
+}
+
+.genre-filter label,
+.rating-filter label {
+    margin-right: 5px;
+}

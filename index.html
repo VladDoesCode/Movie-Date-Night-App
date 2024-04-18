@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Date Night Movie Picker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Date Night Movie Picker</h1>
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="Search for a movie...">
+            <button type="submit">Search</button>
+        </form>
+        <div class="tab-buttons">
+            <button class="tab-button active" data-user="swipe">Movie Swipe</button>
+            <button class="tab-button" data-user="movies">Movies</button>
+            <button class="tab-button" data-user="game">Game Mode</button>
+        </div>
+    </header>
+    <main>
+        <div id="swipeContent" class="tab-content active">
+            <section id="movieSwipeContainer"></section>
+        </div>
+        <div id="moviesContent" class="tab-content">
+            <section id="likedMoviesContainer">
+                <h2>Liked Movies</h2>
+                <div class="liked-movies-actions">
+                    <button id="randomMovieButton">Surprise Us!</button>
+                    <div class="filter-options">
+                        <div class="genre-filter">
+                            <label for="genre-select">Genre:</label>
+                            <select id="genre-select">
+                                <option value="All">All</option>
+                                <!-- Add more genre options here -->
+                            </select>
+                        </div>
+                        <div class="rating-filter">
+                            <label for="rating-select">Rating:</label>
+                            <select id="rating-select">
+                                <option value="All">All</option>
+                                <option value="G">G</option>
+                                <option value="PG">PG</option>
+                                <option value="PG-13">PG-13</option>
+                                <option value="R">R</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="liked-movies-content">
+                    <div class="liked-movies-column">
+                        <h3>Vladimir's Liked Movies</h3>
+                        <div class="vladimir-actions">
+                            <button id="saveMoviesButton-vladimir" class="vladimir-button">Save Vladimir's Movies</button>
+                            <button id="loadMoviesButton-vladimir" class="vladimir-button">Load Vladimir's Movies</button>
+                        </div>
+                        <div id="likedMoviesList-vladimir" class="liked-movies-list"></div>
+                    </div>
+                    <div class="liked-movies-column">
+                        <h3>Taylor's Liked Movies</h3>
+                        <div class="taylor-actions">
+                            <button id="saveMoviesButton-taylor" class="taylor-button">Save Taylor's Movies</button>
+                            <button id="loadMoviesButton-taylor" class="taylor-button">Load Taylor's Movies</button>
+                        </div>
+                        <div id="likedMoviesList-taylor" class="liked-movies-list"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div id="gameContent" class="tab-content">
+            <section id="gameContainer">
+                <h2>Game Mode</h2>
+                <div class="game-content">
+                    <div class="game-column">
+                        <h3>Game Mode</h3>
+                        <div id="gameMode" class="game-mode"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <div id="raceContainer" class="hidden">
+        <div id="raceTrack"></div>
+        <div id="winnerDisplay"></div>
+        <button id="closeButton">Close</button>
+    </div>
+    <div id="confettiContainer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
